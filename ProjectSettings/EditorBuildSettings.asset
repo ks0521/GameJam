@@ -5,13 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/GunTank/Main.unity
     guid: 5128b4bb56058074883104966f513d77
-  - enabled: 1
+  - enabled: 0
     path: Assets/GunTank/GunTank.unity
     guid: 69cf8bf6cb0eb2542afe9b9cb212d395
-  - enabled: 1
+  - enabled: 0
     path: Assets/GunTank/Ending.unity
     guid: 9671d3ac0a0ad984ba5621c085fd67c3
   m_configObjects: {}
