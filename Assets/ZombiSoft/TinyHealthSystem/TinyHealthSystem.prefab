@@ -387,7 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealthBar: {fileID: 5510382442419550054}
-  currentHealthGlobe: {fileID: 1972403611979222780}
+  currentHealthGlobe: {fileID: 0}
   healthText: {fileID: 5510382441472828713}
   hitPoint: 100
   maxHitPoint: 100
@@ -534,17 +534,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 022d97d86ed3fdd4687f901b40fd5f26, type: 3}
---- !u!114 &1972403611979222780 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3851420284585217393, guid: 022d97d86ed3fdd4687f901b40fd5f26, type: 3}
-  m_PrefabInstance: {fileID: 3327488277167440781}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &7625332192419940260 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5187869484376720425, guid: 022d97d86ed3fdd4687f901b40fd5f26, type: 3}
