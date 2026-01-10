@@ -24,6 +24,7 @@ public class PlayerFlickerMove : MonoBehaviour
     Vector2 origin; //캐릭터 시작점 위치
     Vector2 current; //포인터 위치
 
+    IHittable target;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -62,7 +63,6 @@ public class PlayerFlickerMove : MonoBehaviour
             Release();
         }
     }
-
     bool PointerDown(out Vector2 pos)
     {
         //모바일 터치
@@ -175,7 +175,6 @@ public class PlayerFlickerMove : MonoBehaviour
             UpdateLine();
         }
     }
-    
     void UpdateLine()
     {
         if (line == null) return;
@@ -189,5 +188,15 @@ public class PlayerFlickerMove : MonoBehaviour
 
         line.SetPosition(0, origin);
         line.SetPosition(1, end);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Debug.Log("충돌");
+        if (collision.collider.TryGetComponent<IHittable>(out target))
+        {
+            rb.velocity = new Vector2(0, 0);
+            target.Hit(10);
+        }
     }
 }
