@@ -489,7 +489,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 30
   orthographic: 1
   orthographic size: 7
   m_Depth: 0
@@ -1522,7 +1522,7 @@ Transform:
   m_GameObject: {fileID: 1103401724}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: 5, z: -70}
+  m_LocalPosition: {x: 0, y: 10, z: -70}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1537,19 +1537,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1103401724}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 398f8d9c248bc9846980660f1500b13b, type: 3}
+  m_Script: {fileID: 11500000, guid: df686a5e88b913647b4cd0ecd0aea273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefeb: {fileID: 5245331054855148934, guid: 173d5afc549973b48bb4a625f824e1c2, type: 3}
-  factUp:
-  - {fileID: 6206686886458311551, guid: da97c27904a477442b12720d6b882a35, type: 3}
-  - {fileID: 4236376710779966945, guid: 16a483dada4d24742a48f8b8da0bb3f7, type: 3}
-  - {fileID: 3359665218361993197, guid: 188779c854dea144b9bbd0ab82ad81be, type: 3}
-  - {fileID: 8968716050217036789, guid: 37d5dffd3173e1e4e8d657996fc17249, type: 3}
-  - {fileID: 5819549295271972978, guid: 2858ad50c7a26e344bea310e48944c22, type: 3}
-  - {fileID: 5817394633913047765, guid: 5b0c26bd6c71b50449c0294c0b143ecb, type: 3}
-  alignTime: 0.2
-  snapEpsilon: 1
+  dice: {fileID: 5245331054855148934, guid: 173d5afc549973b48bb4a625f824e1c2, type: 3}
+  diceList: []
 --- !u!1 &1232319166
 GameObject:
   m_ObjectHideFlags: 0
