@@ -11,18 +11,13 @@ public class DiceRoll : MonoBehaviour
     Rigidbody rb;
     public event Action<int> OnResult;
     [Header("각 눈의 Rotation(0 = 1눈의 회전, 1 = 2눈의 회전 ...)")]
-    [SerializeField] DiceSide[] Sides = new DiceSide[6];
+    [SerializeField] DiceSide[] Sides;
 
     public bool isSettled { get; private set; }
     public int resultVelue { get; private set; }
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-    }
-    IEnumerator DeleteObj()
-    {
-        yield return new WaitForSeconds(3);
-        Destroy(this);
     }
     public void Rolling()
     {

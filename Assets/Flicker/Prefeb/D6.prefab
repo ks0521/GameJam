@@ -861,9 +861,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Sides:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1273698071564628168}
+  - {fileID: 1681137025646081001}
+  - {fileID: 2272124670471182284}
+  - {fileID: 3530480729404224181}
+  - {fileID: 8933016359434175114}
+  - {fileID: 2447844257148540277}
