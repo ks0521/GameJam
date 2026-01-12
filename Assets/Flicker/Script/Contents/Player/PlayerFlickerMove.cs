@@ -1,14 +1,33 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditorInternal;
+﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.VFX;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class PlayerFlickerMove : MonoBehaviour
 {
+    public float hp;
+    public float Hp
+    {
+        get => hp;
+        set
+        {
+            hp = value;
+            onPlayerHpChange?.Invoke(hp, maxhp);
+        }
+    }
+    public int maxhp = 100;
+    public int mp;
+    public int Mp
+    {
+        get => mp;
+        set
+        {
+            mp = value;
+            onPlayerMpChange?.Invoke(mp, maxMp);
+        }
+    }
+    public int maxMp = 10;
+    #region 세팅
     [Header("Flick")]
     public float power = 12f;
     public float maxDragDistance = 2.5f;
@@ -18,46 +37,106 @@ public class PlayerFlickerMove : MonoBehaviour
     public LineRenderer line; //조준선
     public float lineLengthMultiplier = 1.2f;
 
+    [Header("Player BaseDamage Setting")]
+    public float baseDamage = 10;
+    public float baseKnockBack = 7.5f;
+    public float Growth = 1.18f;
+    public float wallDamage = 15;
+
+    float damage;
+    float knockBack;
+    float stopTimer=0f;
+    const float STOP_TIME = 0.3f;
+    const float STOP_SPEED = 0.05f;
     Rigidbody2D rb;
     Camera cam;
     bool dragging;
+    bool canDragging;
+    public bool IsDead { get; private set; }
     Vector2 origin; //캐릭터 시작점 위치
     Vector2 current; //포인터 위치
 
     IHittable target;
+    Vector2 knockbackDir;
+    bool canAttack; //한번 공격시 비활성화, 플레이어 턴 상태가 올 시 활성화
+    bool isSimulating;
+    bool simulationEnded;
+    bool hadHit;
+    public event Action onShotFired; //플레이어 발사
+    public event Action<bool> onSimulationEnd; //플레이어 멈춤(몬스터 맞췄으면 true, 아니면 false)
+    //public event Action onMonsterHit;
+    public event Action<float,float> onPlayerHpChange;
+    public event Action<int,int> onPlayerMpChange;
+
+    #endregion
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         cam = Camera.main;
+    }
+    private void Start()
+    {
+        Hp = maxhp;
+        Mp = 5;
 
+        canAttack = true;
+        canDragging = true;
         if(line != null)
         {
             line.positionCount = 2;
             line.enabled = false;
         }
     }
-
+    
     private void Update()
+    {
+        CheckSimulationEnd();
+        if (!canDragging) return;
+        HandleInput();
+    }
+    void CheckSimulationEnd()
+    {
+        if (!isSimulating) return;   // Player_Aim 중이면 감시할 필요 없음
+        if (simulationEnded) return;
+
+        if (rb.velocity.sqrMagnitude <= STOP_SPEED * STOP_SPEED &&
+        Mathf.Abs(rb.angularVelocity) <= 0.05f)
+        {
+            stopTimer += Time.deltaTime;
+            if (stopTimer >= STOP_TIME)
+            {
+                simulationEnded = true;
+                isSimulating = false;
+                Debug.Log($"simulation 끝 {hadHit}");
+                onSimulationEnd?.Invoke(hadHit);
+            }
+        }
+        else
+        {
+            stopTimer = 0f;
+        }
+    }
+    void HandleInput()
     {
         //이동중 조작금지
         if (rb.velocity.sqrMagnitude > stopThreshold * stopThreshold) return;
 
-        if(PointerDown(out Vector2 downPos))
+        if (PointerDown(out Vector2 downPos))
         {
             if (isPointerOnUI()) return;
 
             var hit = Physics2D.OverlapPoint(downPos);
-            if(hit != null && hit.attachedRigidbody == rb)
+            if (hit != null && hit.attachedRigidbody == rb)
             {
                 BeginDrag(downPos);
             }
         }
-        if(dragging && PointerHeld(out Vector2 holdPos))
+        if (dragging && PointerHeld(out Vector2 holdPos))
         {
             current = holdPos;
             UpdateLine();
         }
-        if(dragging && PointerUp(out Vector2 upPos))
+        if (dragging && PointerUp(out Vector2 upPos))
         {
             current = upPos;
             Release();
@@ -144,7 +223,12 @@ public class PlayerFlickerMove : MonoBehaviour
         Vector2 impulse = dir * (power * strength);
 
         rb.AddForce(impulse, ForceMode2D.Impulse);
-
+        onShotFired?.Invoke(); //플레이어 발사 상태 발행
+        isSimulating = true;
+        simulationEnded = false;
+        hadHit = false;
+        stopTimer = 0f;
+        target = null;
         if (line != null) line.enabled = false;
     }
     bool isPointerOnUI()
@@ -192,11 +276,56 @@ public class PlayerFlickerMove : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (!canAttack) return;
         Debug.Log("충돌");
         if (collision.collider.TryGetComponent<IHittable>(out target))
         {
-            rb.velocity = new Vector2(0, 0);
-            target.Hit(10);
+            hadHit = true;
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0;
+            knockbackDir = ((Vector2)collision.collider.transform.position-(Vector2)transform.position).normalized;
+        }
+    }
+    public void ApplyDiceResult(int Value)
+    {
+        damage = baseDamage * Mathf.Pow(Growth, Value - 1);
+        knockBack = baseKnockBack * Mathf.Pow(Growth, Value - 1);
+        if(target == null)
+        {
+            Debug.LogWarning("타겟이 없음");
+            canAttack = false;
+            return;
+        }
+        target.Hit(damage, knockbackDir, knockBack);
+        canAttack = false;
+    }
+    public void SetAttackEnabled(bool enabled)
+    {
+        canAttack = enabled;
+    }
+    public void SetInputEnabled(bool enabled)
+    {
+        canDragging = enabled;
+    }
+    public void ForceStop()
+    {
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        line.enabled = false;
+        dragging = false;
+    }
+    public void BeginTurn()
+    {
+        isSimulating = true;
+        canDragging = true;
+        canAttack = true;
+    }
+    public void Damaged(float damage)
+    {
+        Hp-=damage;
+        if (hp < 0)
+        {
+            IsDead = true;
         }
     }
 }

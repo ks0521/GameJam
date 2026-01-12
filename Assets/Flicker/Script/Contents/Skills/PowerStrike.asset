@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   diceType: 1
   diceCount: 1
+  Cost: 6
+  images: {fileID: 21300000, guid: 7a53464fb2d5a014e9987bcbd69e2fa3, type: 3}

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,10 +7,12 @@ using UnityEngine;
 
 public class DiceManager : MonoBehaviour
 {
-    private static DiceManager instance;
+    public static DiceManager instance;
     [SerializeField] GameObject dice;
     [SerializeField]List<GameObject> diceList;
     [SerializeField] GameObject HUD;
+    [SerializeField] PlayerFlickerMove player;
+    public event Action<int> OnDiceResult;
     public int ValueSum { get; private set; }
     DiceType nowType; //현재 주사위를 굴리고 있는 타입
     int maxCompleteCount;
@@ -58,23 +61,15 @@ public class DiceManager : MonoBehaviour
             diceList[i].GetComponent<DiceRoll>().OnResult -= AddResult;
             PoolManager.poolDic[nowType].ReturnPool(diceList[i]);
         }
+        if(ValueSum<=2)
+        {
+            Debug.Log("참가상! 마나+2");
+            
+        }
         diceList.Clear();
+        OnDiceResult?.Invoke(ValueSum);
         HUD.SetActive(true);
+        ValueSum = 0;
     }
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            RollDice(1, DiceType.D6);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            RollDice(2, DiceType.D12);
-        }
 
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            diceList.Clear();
-        }
-    }
 }

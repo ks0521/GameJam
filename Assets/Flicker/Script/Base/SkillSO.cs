@@ -7,5 +7,6 @@ public class SkillSO : ScriptableObject
 {
     public DiceType diceType;
     public int diceCount;
-
+    public int Cost;
+    public Sprite images;
 }

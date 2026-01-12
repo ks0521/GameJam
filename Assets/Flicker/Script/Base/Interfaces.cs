@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IHittable
 {
-    public void Hit(int damage);
+    public void Hit(float damage, Vector2 knockbackDir, float knockbackPower);
 }
 public class Interfaces 
 {
