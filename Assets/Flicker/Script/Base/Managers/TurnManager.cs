@@ -47,8 +47,8 @@ public class TurnManager : MonoBehaviour
     {
         if (player != null)
         {
-            player.onShotFired += PlayerShot;
-            player.onSimulationEnd += SimulationEnd;
+            player.onPlayerShooted += PlayerShot;
+            player.onPlayerStopped += SimulationEnd;
         }
         if (diceManager != null)
             diceManager.OnDiceResult += DiceRolled;
@@ -57,8 +57,8 @@ public class TurnManager : MonoBehaviour
     {
         if (player != null)
         {
-            player.onShotFired -= PlayerShot;
-            player.onSimulationEnd -= SimulationEnd;
+            player.onPlayerShooted -= PlayerShot;
+            player.onPlayerStopped -= SimulationEnd;
         }
         if (diceManager != null)
             diceManager.OnDiceResult -= DiceRolled;

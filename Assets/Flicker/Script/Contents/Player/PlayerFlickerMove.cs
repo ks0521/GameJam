@@ -29,9 +29,9 @@ public class PlayerFlickerMove : MonoBehaviour
     public int maxMp = 10;
     #region 세팅
     [Header("Flick")]
-    public float power = 12f;
-    public float maxDragDistance = 2.5f;
-    public float stopThreshold = 0.15f;
+    public float power = 12f; //충격량
+    public float maxDragDistance = 2.5f; //최대 당기는 힘(거리)
+    public float stopThreshold = 0.15f; //
 
     [Header("Aim Line(Optional)")]
     public LineRenderer line; //조준선
@@ -59,12 +59,11 @@ public class PlayerFlickerMove : MonoBehaviour
     IHittable target;
     Vector2 knockbackDir;
     bool canAttack; //한번 공격시 비활성화, 플레이어 턴 상태가 올 시 활성화
-    bool isSimulating;
-    bool simulationEnded;
-    bool hadHit;
-    public event Action onShotFired; //플레이어 발사
-    public event Action<bool> onSimulationEnd; //플레이어 멈춤(몬스터 맞췄으면 true, 아니면 false)
-    //public event Action onMonsterHit;
+    bool isPlayerMoving;
+    bool hadHit; //플레이어가 몬스터를 타격했는지 확인
+
+    public event Action onPlayerShooted; //플레이어 발사
+    public event Action<bool> onPlayerStopped; //플레이어 멈춤(몬스터 맞췄으면 true, 아니면 false)
     public event Action<float,float> onPlayerHpChange;
     public event Action<int,int> onPlayerMpChange;
 
@@ -96,19 +95,17 @@ public class PlayerFlickerMove : MonoBehaviour
     }
     void CheckSimulationEnd()
     {
-        if (!isSimulating) return;   // Player_Aim 중이면 감시할 필요 없음
-        if (simulationEnded) return;
+        if (!isPlayerMoving) return;   // 플레이어가 움직이지 않으면 감시할 필요 없음
 
-        if (rb.velocity.sqrMagnitude <= STOP_SPEED * STOP_SPEED &&
+        if (rb.velocity.sqrMagnitude <= 0.0005f &&
         Mathf.Abs(rb.angularVelocity) <= 0.05f)
         {
             stopTimer += Time.deltaTime;
             if (stopTimer >= STOP_TIME)
             {
-                simulationEnded = true;
-                isSimulating = false;
-                Debug.Log($"simulation 끝 {hadHit}");
-                onSimulationEnd?.Invoke(hadHit);
+                isPlayerMoving = false;
+                Debug.Log($"플레이어 움직임 멈춤, 몬스터 공격: {hadHit}");
+                onPlayerStopped?.Invoke(hadHit);
             }
         }
         else
@@ -142,6 +139,11 @@ public class PlayerFlickerMove : MonoBehaviour
             Release();
         }
     }
+    /// <summary>
+    /// 플레이어가 마우스 / 터치했는지 확인
+    /// </summary>
+    /// <param name="pos">터치한 위치</param>
+    /// <returns>터치여부</returns>
     bool PointerDown(out Vector2 pos)
     {
         //모바일 터치
@@ -164,6 +166,11 @@ public class PlayerFlickerMove : MonoBehaviour
         pos = default;
         return false;
     }
+    /// <summary>
+    /// 플레이어가 마우스 / 터치 유지중인지 확인
+    /// </summary>
+    /// <param name="pos">현재 터치중인 위치</param>
+    /// <returns>터치여부</returns>
     bool PointerHeld(out Vector2 pos)
     {
         //모바일
@@ -186,6 +193,11 @@ public class PlayerFlickerMove : MonoBehaviour
         pos = default;
         return false;
     }
+    /// <summary>
+    /// 플레이어가 마우스 / 포인터 뗐을 때의 위치
+    /// </summary>
+    /// <param name="pos">마우스 / 포인터 뗀 위치</param>
+    /// <returns></returns>
     bool PointerUp(out Vector2 pos)
     {
         if (Input.touchCount > 0)
@@ -212,7 +224,7 @@ public class PlayerFlickerMove : MonoBehaviour
         Vector2 delta = current - origin;
         float dist = Mathf.Min(delta.magnitude, maxDragDistance);
         //당기는힘 너무작으면 취소
-        if (dist < 0.05f)
+        if (dist < 0.2f)
         {
             if (line != null) line.enabled = false;
             return;
@@ -223,12 +235,9 @@ public class PlayerFlickerMove : MonoBehaviour
         Vector2 impulse = dir * (power * strength);
 
         rb.AddForce(impulse, ForceMode2D.Impulse);
-        onShotFired?.Invoke(); //플레이어 발사 상태 발행
-        isSimulating = true;
-        simulationEnded = false;
-        hadHit = false;
-        stopTimer = 0f;
-        target = null;
+        onPlayerShooted?.Invoke(); //플레이어 발사 상태 발행
+
+        Shooted();
         if (line != null) line.enabled = false;
     }
     bool isPointerOnUI()
@@ -299,6 +308,13 @@ public class PlayerFlickerMove : MonoBehaviour
         target.Hit(damage, knockbackDir, knockBack);
         canAttack = false;
     }
+    public void Shooted()
+    {
+        isPlayerMoving = true;
+        hadHit = false;
+        stopTimer = 0f;
+        target = null;
+    }
     public void SetAttackEnabled(bool enabled)
     {
         canAttack = enabled;
@@ -316,7 +332,7 @@ public class PlayerFlickerMove : MonoBehaviour
     }
     public void BeginTurn()
     {
-        isSimulating = true;
+        isPlayerMoving = true;
         canDragging = true;
         canAttack = true;
     }
